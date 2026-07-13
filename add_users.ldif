@@ -1,0 +1,21 @@
+dn: uid=cplaza,ou=people,dc=mquest,dc=local
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Christian Plaza
+sn: Plaza
+uid: cplaza
+userPassword: cplazapassword123
+mail: christian.plaza.ibarra@gmail.com
+
+dn: uid=cplaza2,ou=people,dc=mquest,dc=local
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Christian Plaza 2
+sn: Plaza
+uid: cplaza2
+userPassword: cplazapassword123
+mail: chplaza@hotmail.com

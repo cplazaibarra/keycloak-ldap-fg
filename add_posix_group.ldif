@@ -1,0 +1,5 @@
+dn: cn=users,ou=groups,dc=mquest,dc=local
+objectClass: posixGroup
+objectClass: top
+cn: users
+gidNumber: 10000

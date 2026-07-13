@@ -1,0 +1,84 @@
+services:
+  openldap:
+    image: osixia/openldap:1.5.0
+    container_name: openldap
+    command: --copy-service --loglevel info
+    ports:
+      - "389:389"
+      - "636:636"
+    environment:
+      - LDAP_ORGANISATION=Mquest Local Org
+      - LDAP_DOMAIN=mquest.local
+      - LDAP_ADMIN_PASSWORD=adminpassword
+    volumes:
+      - ./bootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/bootstrap.ldif
+      - ./ldap-data:/var/lib/ldap
+      - ./ldap-config:/etc/ldap/slapd.d
+    networks:
+      - lab-network
+
+  lam:
+    image: ldapaccountmanager/lam:stable
+    container_name: lam
+    ports:
+      - "8085:80"
+    environment:
+      - LAM_SKIP_PRECONFIGURE=false
+      - LAM_PASSWORD=adminpassword
+      - LDAP_SERVER=ldap://openldap:389
+      - LDAP_BASE_DN=dc=mquest,dc=local
+      - LDAP_USER=cn=admin,dc=mquest,dc=local
+      - LDAP_USERS_DN=ou=people,dc=mquest,dc=local
+      - LDAP_GROUPS_DN=ou=groups,dc=mquest,dc=local
+    depends_on:
+      - openldap
+    networks:
+      - lab-network
+
+  keycloak:
+    build:
+      context: ./keycloak-radius
+      dockerfile: Dockerfile
+    image: keycloak-radius-lab:latest
+    container_name: keycloak
+    ports:
+      - "8088:8080"
+      - "1812:1812/udp"
+      - "1813:1813/udp"
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    command: start-dev
+    depends_on:
+      - openldap
+    networks:
+      - lab-network
+
+  test-client:
+    image: ubuntu:latest
+    container_name: test-client
+    command: bash -c "apt-get update && apt-get install -y freeradius-utils iputils-ping && sleep infinity"
+    depends_on:
+      - keycloak
+    networks:
+      - lab-network
+
+  test-radius:
+    build:
+      context: ./test-radius
+      dockerfile: Dockerfile
+    container_name: TEST-RADIUS
+    hostname: TEST-RADIUS
+    ports:
+      - "2222:22"
+    volumes:
+      - ./test-radius/radius.conf:/etc/pam_radius_auth.conf:ro
+    depends_on:
+      - keycloak
+    networks:
+      - lab-network
+    restart: unless-stopped
+
+networks:
+  lab-network:
+    driver: bridge

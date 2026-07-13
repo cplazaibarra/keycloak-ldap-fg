@@ -1,0 +1,26 @@
+dn: ou=people,dc=mquest,dc=local
+objectClass: organizationalUnit
+objectClass: top
+ou: people
+
+dn: ou=groups,dc=mquest,dc=local
+objectClass: organizationalUnit
+objectClass: top
+ou: groups
+
+dn: uid=vpnuser,ou=people,dc=mquest,dc=local
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: VPN User
+sn: User
+uid: vpnuser
+userPassword: vpnpassword123
+mail: vpnuser@mquest.local
+
+dn: cn=VPNGroup,ou=groups,dc=mquest,dc=local
+objectClass: groupOfNames
+objectClass: top
+cn: VPNGroup
+member: uid=vpnuser,ou=people,dc=mquest,dc=local

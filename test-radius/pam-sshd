@@ -1,0 +1,20 @@
+#%PAM-1.0
+# PAM configurado para autenticación RADIUS + OTP en SSH
+# El usuario ingresa: contraseña + OTP (concatenados)
+# Ejemplo: cplazapassword123982314
+
+# Intentar RADIUS primero
+auth       sufficient   pam_radius_auth.so debug
+# Fallback a contraseña local (para usuario admin)
+auth       required     pam_unix.so nullok_secure
+
+# Gestión de cuentas - permitir si el usuario existe
+account    sufficient   pam_permit.so
+account    required     pam_unix.so
+
+# Gestión de sesión
+session    required     pam_limits.so
+session    required     pam_unix.so
+
+# Contraseñas
+password   required     pam_unix.so obscure sha512
