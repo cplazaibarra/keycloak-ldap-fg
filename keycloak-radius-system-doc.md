@@ -47,7 +47,7 @@ graph TD
 *   **URL Re-dirigida (desde Host HP)**: `http://192.168.1.120:9091/lam/`
 *   **Servidor de Conexión (LDAP Server)**: `localhost`
 *   **Contraseña de LAM (Administrador)**: `adminpassword`
-*   **Base DN**: `dc=antigravity,dc=com`
+*   **Base DN**: `dc=mquest,dc=local`
 
 ### 2.3. Consola Web de Keycloak
 *   **URL Local (en la VM)**: `http://192.168.122.151:8080`
