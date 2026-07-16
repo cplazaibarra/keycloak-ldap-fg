@@ -77,6 +77,15 @@ Toda la creación de usuarios y contraseñas se realiza a través de **LDAP Acco
 4. En la pestaña **Groups**, asocia el usuario a un grupo de LDAP si es necesario (ej: `VPNGroup`).
 5. Haz clic en **Save**.
 
+### 3.2. Descripción de las Aplicaciones de Directorio (OpenLDAP & LAM)
+
+El ecosistema cuenta con dos componentes fundamentales para el almacenamiento y administración del directorio de identidades:
+
+*   **OpenLDAP (slapd)**: Es el motor del directorio de base de datos jerárquico. Utiliza esquemas estandarizados para almacenar las cuentas y grupos. Toda la información de usuarios se organiza en la estructura de árbol bajo el sufijo base `dc=mquest,dc=local`. 
+    *   **Usuarios**: Almacenados en la unidad organizativa `ou=people,dc=mquest,dc=local` con clases de objeto `posixAccount`, `inetOrgPerson` y `shadowAccount`.
+    *   **Grupos**: Almacenados en `ou=groups,dc=mquest,dc=local` con clases de objeto `posixGroup` para definir la pertenencia a grupos (como `VPNGroup`).
+*   **LDAP Account Manager (LAM)**: Es una aplicación web basada en PHP que corre sobre el servidor web Apache en la misma VM. Su propósito es proveer una interfaz de administración visual amigable. Permite realizar operaciones CRUD (crear, leer, actualizar, borrar) en OpenLDAP sin requerir la edición manual de archivos LDIF o comandos de terminal de LDAP.
+
 ---
 
 ## 4. Guía de Integración con Dispositivos de Red
