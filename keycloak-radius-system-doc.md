@@ -245,6 +245,30 @@ Puedes forzar a que tus servidores Linux utilicen las mismas contraseñas del di
 4. **Habilitar SSH Password Authentication**:
    En `/etc/ssh/sshd_config`, asegúrate de tener `PasswordAuthentication yes` y `UsePAM yes`. Luego reinicia el servicio SSH (`systemctl restart sshd`).
 
+#### C. Diagrama de Flujo: Autenticación de Servidores Linux (SSH) vía RADIUS/PAM
+El flujo completo de un usuario iniciando sesión de consola SSH en un servidor Linux que valida contra el servidor AAA utilizando el módulo PAM:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin as Administrador (Cliente SSH)
+    participant SRV as Servidor Linux (SSH + PAM)
+    participant KC as Servidor Keycloak (RADIUS)
+    participant LDAP as Servidor OpenLDAP (Directorio)
+
+    Admin->>SRV: 1. Intento de Conexión SSH (ssh usuario@servidor_linux)
+    SRV-->>Admin: 2. Solicita Contraseña del Usuario
+    Admin->>SRV: 3. Introduce Contraseña
+    SRV->>SRV: 4. Deriva la Solicitud a PAM
+    Note over SRV: PAM procesa la regla de sshd<br/>e invoca a pam_radius_auth.so
+    SRV->>KC: 5. Envía RADIUS Access-Request (Usuario y Clave)
+    KC->>LDAP: 6. Valida Contraseña en Directorio LDAP (Bind Request)
+    LDAP-->>KC: 7. Retorna resultado de validación LDAP (Éxito)
+    KC-->>SRV: 8. Envía RADIUS Access-Accept
+    SRV->>SRV: 9. PAM valida éxito y autoriza el inicio de sesión
+    SRV-->>Admin: 10. Login Exitoso (Otorga consola Bash en el servidor)
+```
+
 ---
 
 ## 5. Documentación de Servicios y Monitoreo local en la VM
