@@ -146,8 +146,38 @@ Para aplicar filtros de contenido o reglas de cortafuegos distintas según el ro
            set schedule "always"
            set service "ALL"
        next
-   end
-   ```
+    end
+    ```
+
+#### C. Flujo de Conexión VPN con Segundo Factor (2FA / OTP)
+Para robustecer la seguridad, el ecosistema admite la autenticación multifactor (MFA). El flujo de autenticación y validación del token de un solo uso (OTP) se realiza de la siguiente manera:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Usuario (FortiClient)
+    participant FG as FortiGate (VPN Gateway)
+    participant KC as Servidor Keycloak (RADIUS)
+    participant LDAP as Servidor OpenLDAP (Directorio)
+
+    User->>FG: 1. Intento de Conexión (Usuario + Contraseña + OTP)
+    Note over User,FG: La contraseña y el OTP se ingresan concatenados en el campo de clave.<br/>Ejemplo: 'mipassword' + '123456' (token) -> 'mipassword123456'
+    FG->>KC: 2. Envía RADIUS Access-Request
+    Note over FG,KC: Transporta el String completo de la clave
+    KC->>KC: 3. Decodifica y Divide el String
+    Note over KC: Separa la clave LDAP del usuario<br/>de los últimos 6 dígitos (Código OTP)
+    KC->>LDAP: 4. Consulta y Valida Contraseña LDAP (Bind Request)
+    LDAP-->>KC: 5. Retorna resultado de validación LDAP
+    KC->>KC: 6. Valida Código OTP contra Keycloak
+    Note over KC: Compara el código con la semilla TOTP<br/>del autenticador registrado del usuario
+    alt Contraseña y OTP Correctos
+        KC-->>FG: 7a. Envía RADIUS Access-Accept + Atributo Fortinet-Group-Name
+        FG-->>User: 8a. Conexión Establecida (Túnel Levantado con IP de Pool)
+    else Alguna credencial incorrecta
+        KC-->>FG: 7b. Envía RADIUS Access-Reject
+        FG-->>User: 8b. Conexión Rechazada (Error de Autenticación)
+    end
+```
 
 ---
 
