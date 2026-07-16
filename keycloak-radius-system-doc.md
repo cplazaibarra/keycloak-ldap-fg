@@ -198,8 +198,8 @@ Para asegurar la red inalámbrica de tu oficina forzando a que cada usuario util
      * `Tunnel-Private-Group-ID` = `<ID_DE_LA_VLAN>` (ejemplo: `10` en formato String).
    * El Access Point leerá estos atributos tras un inicio de sesión exitoso y colocará el dispositivo móvil/PC del usuario en la VLAN asignada automáticamente.
 
-#### C. Diagrama de Flujo: Wi-Fi Enterprise (802.1X) y Asignación Dinámica de VLAN (802.1Q)
-El flujo completo de conexión de un usuario conectándose a la red corporativa mediante Wi-Fi Enterprise sin segundo factor (OTP), y recibiendo una VLAN segmentada dinámicamente:
+#### C. Diagrama de Flujo: Wi-Fi Enterprise (802.1X) - Sin OTP
+El flujo completo de conexión de un usuario conectándose a la red corporativa mediante Wi-Fi Enterprise (WPA-Enterprise) utilizando sus credenciales LDAP directamente, sin segundo factor (OTP):
 
 ```mermaid
 sequenceDiagram
@@ -208,19 +208,17 @@ sequenceDiagram
     participant AP as Access Point (WPA-Enterprise)
     participant KC as Servidor Keycloak (RADIUS)
     participant LDAP as Servidor OpenLDAP (Directorio)
-    participant DHCP as Servidor DHCP (Red VLAN)
+    participant DHCP as Servidor DHCP (SSID Local)
 
     User->>AP: 1. Intento de Conexión a SSID (Usuario + Contraseña)
     AP->>KC: 2. Envía RADIUS Access-Request (Encapsulación EAP)
     KC->>LDAP: 3. Consulta y Valida Contraseña LDAP (Bind Request)
     LDAP-->>KC: 4. Retorna resultado de validación LDAP (Éxito)
-    KC->>KC: 5. Determina Grupo y Asigna Atributos de Red
-    Note over KC: Inserta atributos estándar en la respuesta:<br/>Tunnel-Type = VLAN (13),<br/>Tunnel-Medium-Type = 802 (6),<br/>Tunnel-Private-Group-ID = VLAN ID (ej: "10")
-    KC-->>AP: 6. Envía RADIUS Access-Accept + Atributos de VLAN
-    AP->>User: 7. Completa 4-Way Handshake (Asociación Wi-Fi exitosa)
-    Note over AP: El AP etiqueta (taggea) dinámicamente el puerto<br/>del cliente a la VLAN 10 (Protocolo 802.1Q)
-    User->>DHCP: 8. Solicita IP (DHCP Discover sobre el canal de la VLAN 10)
-    DHCP-->>User: 9. Asigna IP del pool de la VLAN 10 (ej: 10.10.10.X)
+    KC-->>AP: 5. Envía RADIUS Access-Accept
+    AP->>User: 6. Completa 4-Way Handshake (Asociación Wi-Fi exitosa)
+    Note over AP: El AP asocia al cliente a la red local del SSID
+    User->>DHCP: 7. Solicita IP (DHCP Discover)
+    DHCP-->>User: 8. Asigna IP del segmento de red local (ej: 192.168.1.X)
 ```
 
 ---
